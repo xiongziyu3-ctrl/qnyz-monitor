@@ -208,7 +208,7 @@ def run_once(client, cfg, state, do_notify=True, persist=True, notify_gate=None)
     f = cfg.get("filters") or {}
     date_from = f.get("date_from", "") or ""
     date_to = f.get("date_to", "") or ""
-    has_range = bool(date_from or date_to)
+    has_range = bool(date_from and date_to)
 
     stations = get_stations(client, cfg)
     stations = apply_filters(stations, cfg)
