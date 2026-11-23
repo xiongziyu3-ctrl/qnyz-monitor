@@ -77,7 +77,11 @@ def to_int(v, default=None):
 # ── 拉取并标记驿站 ─────────────────────────────────────────
 
 def get_stations(client, cfg):
-    """拉取全部驿站，并标记每个是否『仅供集体申请』(groupOnly)。"""
+    """拉取全部驿站，并标记每个是否『仅供集体申请』(groupOnly)。
+
+    判定：housType=1 返回全部房源；housType=0 返回可供个人申请房源；
+    在前者却不在后者的即为仅供集体申请。
+    """
     f = cfg.get("filters") or {}
     name = f.get("name", "")
     ut = to_int(f.get("user_type"), 2)
@@ -99,7 +103,7 @@ def get_stations(client, cfg):
             start_time=list_st, end_time=list_et
         )
         pids = {s.get("id") for s in personal}
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.warning("获取个人可申请列表失败，无法标记集体申请: %s", e)
         pids = None
 
@@ -109,6 +113,10 @@ def get_stations(client, cfg):
         )
 
     return all_st
+
+
+   
+
 
 
 
