@@ -85,16 +85,17 @@ def get_stations(client, cfg):
     name = f.get("name", "")
     ut = to_int(f.get("user_type"), 2)
     # 只有入住和离店日期都填写时，才让服务器按整个入住区间筛选。
-    # 只填写一个日期时，获取全部驿站，再由本地日历逐日过滤。
-    st = f.get("date_from", "") or ""
-    et = f.get("date_to", "") or ""
-    list_st, list_et = (st, et) if st and et else ("", "")
+    # 只填写一个日期时，获取全部驿站，再由本地日历逐日过滤。 
+st, et = f.get("date_from", "") or "", f.get("date_to", "") or ""
+list_st, list_et = (st, et) if st and et else ("", "")
 
-    all_st = client.list_houses(name=name, user_type=ut, hous_type=1,
-                                start_time=list_st, end_time=list_et)
-    try:
-        personal = client.list_houses(name=name, user_type=ut, hous_type=0,
-                                      start_time=list_st, end_time=list_et)
+all_st = client.list_houses(name=name, user_type=ut, hous_type=1,
+                            start_time=list_st, end_time=list_et)
+
+try:
+    personal = client.list_houses(name=name, user_type=ut, hous_type=0,
+                                   start_time=list_st, end_time=list_et)
+
 
         pids = {s.get("id") for s in personal}
     except Exception as e:  # noqa: BLE001
