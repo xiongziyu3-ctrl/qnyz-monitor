@@ -84,14 +84,18 @@ def get_stations(client, cfg):
     f = cfg.get("filters") or {}
     name = f.get("name", "")
     ut = to_int(f.get("user_type"), 2)
-    # 入住/离店日期传给接口 startTime/endTime，由服务器筛出“可住满整个区间”的驿站
-    # （与官网筛选逻辑一致）。
-    st, et = f.get("date_from", "") or "", f.get("date_to", "") or ""
+    # 只有入住和离店日期都填写时，才让服务器按整个入住区间筛选。
+    # 只填写一个日期时，获取全部驿站，再由本地日历逐日过滤。
+    st = f.get("date_from", "") or ""
+    et = f.get("date_to", "") or ""
+    list_st, list_et = (st, et) if st and et else ("", "")
+
     all_st = client.list_houses(name=name, user_type=ut, hous_type=1,
-                                start_time=st, end_time=et)
+                                start_time=list_st, end_time=list_et)
     try:
         personal = client.list_houses(name=name, user_type=ut, hous_type=0,
-                                       start_time=st, end_time=et)
+                                      start_time=list_st, end_time=list_et)
+
         pids = {s.get("id") for s in personal}
     except Exception as e:  # noqa: BLE001
         logger.warning("获取个人可申请列表失败，无法标记集体申请: %s", e)
