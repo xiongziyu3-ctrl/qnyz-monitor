@@ -249,7 +249,6 @@ def run_once(client, cfg, state, do_notify=True, persist=True, notify_gate=None)
     for s, dates in results:
         logger.info("可预约: %s", fmt_station(s, dates))
 
-   
     # 去重：记录每个驿站当前可预约日期
     stay_token = f"stay:{date_from}~{date_to}"
     new_hits = []
