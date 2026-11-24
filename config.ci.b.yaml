@@ -10,7 +10,11 @@ filters:
   name: ""
   user_type: 2
   apply_scope: "personal"
-  districts: []
+  districts:
+  - "黄浦区"
+  - "静安区"
+  - "徐汇区"
+  - "长宁区"
   date_from: "2026-12-01"
   date_to: ""
   min_house_count: 0
