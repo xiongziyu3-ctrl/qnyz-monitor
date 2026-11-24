@@ -53,9 +53,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: state.json
-          key: qnyz-state-${{ matrix.name }}-${{ github.run_id }}
+        key: qnyz-state-v2-${{ matrix.name }}-${{ github.run_id }}
           restore-keys: |
-            qnyz-state-${{ matrix.name }}-
+            qnyz-state-v2-${{ matrix.name }}-
 
       - name: Run check (${{ matrix.name }})
         env:
