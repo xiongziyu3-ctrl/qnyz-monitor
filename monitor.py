@@ -249,7 +249,8 @@ def run_once(client, cfg, state, do_notify=True, persist=True, notify_gate=None)
     for s, dates in results:
         logger.info("可预约: %s", fmt_station(s, dates))
 
-    # 去重：有区间时按“该驿站能否满足此入住区间”去重；无区间时按可约日期集合去重
+   
+    # 去重：记录每个驿站当前可预约日期
     stay_token = f"stay:{date_from}~{date_to}"
     new_hits = []
     for s, dates in results:
@@ -264,9 +265,15 @@ def run_once(client, cfg, state, do_notify=True, persist=True, notify_gate=None)
             new_hits.append((s, dates, fresh))
         state[sid] = {"name": s.get("name"), "dates": cur}
 
+    # 首次通知标记：保存在 state.json 中，跨运行保留
+    meta = state.setdefault("__meta__", {})
+    first_notify = not meta.get("initial_notify_done", False)
+
     # 清理已无可约的驿站状态
     live_ids = {str(s["id"]) for s, _ in results}
     for sid in list(state.keys()):
+        if sid == "__meta__":
+            continue
         if sid not in live_ids:
             del state[sid]
 
@@ -274,6 +281,60 @@ def run_once(client, cfg, state, do_notify=True, persist=True, notify_gate=None)
     if not gate_ok:
         logger.info("本轮结果已被新配置取代，跳过推送与状态写入")
         return results, new_hits
+
+    # 第一次推送全部现有房源，之后只推送新增可预约日期
+    notify_hits = (
+        [(s, dates, []) for s, dates in results]
+        if first_notify else new_hits
+    )
+
+    if notify_hits and do_notify:
+        stay = f"{date_from}→{date_to}" if has_range else None
+        lines = [
+            fmt_notify(s, dates, stay=stay)
+            for s, dates, _ in notify_hits
+        ]
+
+        if first_notify:
+            title = f"青年驿站首次通知：当前 {len(notify_hits)} 处可预约"
+        elif has_range:
+            title = f"青年驿站 {len(notify_hits)} 处可住 {date_from}→{date_to}"
+        else:
+            title = f"青年驿站 {len(notify_hits)} 处新增可预约"
+
+        body = "\n".join(lines)
+        max_len = to_int(cfg.get("notify_max_len"), 1500)
+        if len(body) > max_len:
+            shown = 0
+            kept = []
+            for ln in lines:
+                if shown + len(ln) + 1 > max_len:
+                    break
+                kept.append(ln)
+                shown += len(ln) + 1
+            kept.append(f"…还有 {len(lines) - len(kept)} 处（详见日志）")
+            body = "\n".join(kept)
+
+        sent = notify_send(
+            cfg.get("notify") or {},
+            title,
+            body,
+            verify=cfg.get("verify_ssl", True)
+        )
+
+        # 只有首次推送真正成功，才标记首次通知已完成
+        if first_notify and sent:
+            meta["initial_notify_done"] = True
+            logger.info("首次通知成功，后续改为增量通知")
+
+    elif notify_hits:
+        logger.info("有 %d 处待通知房源（--no-notify 未推送）", len(notify_hits))
+    else:
+        logger.info("无新增可预约房源")
+
+    if persist:
+        save_state(state)
+    return results, new_hits
 
     if new_hits and do_notify:
         stay = f"{date_from}→{date_to}" if has_range else None
