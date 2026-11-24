@@ -48,7 +48,7 @@ jobs:
       - name: Install deps
         run: pip install requests PyYAML
 
-           # 每组独立的去重缓存（key 前缀含组名，互不覆盖）
+      # 每组独立的去重缓存（key 前缀含组名，互不覆盖）
       - name: Restore dedup state (${{ matrix.name }})
         uses: actions/cache@v4
         with:
