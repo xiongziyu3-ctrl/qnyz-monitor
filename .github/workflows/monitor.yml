@@ -69,7 +69,7 @@ jobs:
         run: |
           test -n "$BARK_URL"
           curl --fail --silent --show-error \
-            --get \
-            --data-urlencode "group=青年驿站测试" \
-            --data-urlencode "isArchive=1" \
-            "$BARK_URL/自动推送测试/GitHub Actions Bark 测试成功"
+            --request POST \
+            --header "Content-Type: application/json" \
+            --data '{"title":"自动推送测试","body":"GitHub Actions Bark 测试成功","group":"青年驿站测试"}' \
+            "$BARK_URL"
