@@ -15,7 +15,6 @@ filters:
   - "静安区"
   - "徐汇区"
   - "长宁区"
-  only_stations: []
   date_from: "2026-12-01"
   date_to: ""
   min_house_count: 0
