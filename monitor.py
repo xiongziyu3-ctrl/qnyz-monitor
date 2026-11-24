@@ -267,7 +267,7 @@ def run_once(client, cfg, state, do_notify=True, persist=True, notify_gate=None)
     # 首次通知标记：保存在 state.json 中，跨运行保留
     meta = state.setdefault("__meta__", {})
     first_notify = not meta.get("initial_notify_done", False)
-
+    logger.info("首次通知检查：first_notify=%s, initial_notify_done=%r", first_notify, meta.get("initial_notify_done"))
     # 清理已无可约的驿站状态
     live_ids = {str(s["id"]) for s, _ in results}
     for sid in list(state.keys()):
