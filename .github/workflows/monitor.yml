@@ -67,6 +67,7 @@ jobs:
         env:
           BARK_URL: ${{ secrets.BARK_URL }}
         run: |
+          test -n "$BARK_URL"
           curl --fail --silent --show-error \
             --get \
             --data-urlencode "group=青年驿站测试" \
