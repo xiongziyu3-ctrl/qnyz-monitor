@@ -62,14 +62,3 @@ jobs:
           QNYZ_NOTIFY_URL: ${{ secrets.BARK_URL }}
         run: python monitor.py --once --config ${{ matrix.config }}
         
-      - name: Test Bark notification
-        if: matrix.name == 'A'
-        env:
-          BARK_URL: ${{ secrets.BARK_URL }}
-        run: |
-          test -n "$BARK_URL"
-          curl --fail --silent --show-error \
-            --request POST \
-            --header "Content-Type: application/json" \
-            --data '{"title":"自动推送测试","body":"GitHub Actions Bark 测试成功","group":"青年驿站测试"}' \
-            "$BARK_URL"
