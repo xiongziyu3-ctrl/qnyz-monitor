@@ -39,7 +39,8 @@ def send(notify_cfg, title, text, verify=True):
             r = requests.post(url, json={"title": title, "text": text},
                               timeout=15, verify=verify)
         r.raise_for_status()
-        logger.info("通知已发送 (%s)", ntype)
+        logger.info("通知请求成功 (%s)，HTTP状态码：%s，响应：%s",
+            ntype, r.status_code, r.text[:300])
         return True
     except Exception as e:  # noqa: BLE001
         logger.error("通知发送失败 (%s): %s", ntype, e)
